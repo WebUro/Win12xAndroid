@@ -1,5 +1,7 @@
 # Win12xAndroid
+
 ## Credits
-Users  | Made
-------------
-Creator | The whole project
+
+| Role    | Contributor        |
+|---------|------------------|
+| Creator | The whole project |
