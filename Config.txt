@@ -1,2 +1,42 @@
+# Configuration file for Windows 12 Web API
+
+# Web API core settings
 webapi.active = true
-webapi.sourcelua = nil
+webapi.security = true
+webapi.port = 8080
+webapi.logging = true
+webapi.mode = "production"
+
+# Scripting and extension
+webapi.sourcelua = none
+
+# Authentication
+webapi.auth.enabled = true
+webapi.auth.method = "token"
+webapi.auth.token_expiry = 3600
+
+# Rate limiting & performance
+webapi.ratelimit.enabled = true
+webapi.ratelimit.requests_per_minute = 120
+
+webapi.cache.enabled = true
+webapi.cache.ttl = 900
+
+# UI/Theming
+webapi.theme = "windows12-dark"
+
+# Client compatibility
+webapi.client.desktop = true
+webapi.client.mobile = true
+
+# Error reporting & analytics
+webapi.analytics = true
+webapi.error.reporting = true
+webapi.error.log_path = "/var/log/win12webapi-errors.log"
+
+# Localization and language support
+webapi.language = "auto"
+webapi.supported_languages = "en,fr,de,es,zh"
+
+# Reserved for future/extension config
+# webapi.custom_option = ""
