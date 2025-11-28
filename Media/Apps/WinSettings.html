@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Windows 12 Settings</title>
+    <title>Windows 12 Settings (Mobile + Animations)</title>
 
     <style>
+        :root{
+            --accent: #0078d4;
+            --bg: #f3f3f3;
+            --card-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
         body {
             margin: 0;
-            font-family: Segoe UI, sans-serif;
-            background: #f3f3f3;
+            font-family: Segoe UI, Roboto, system-ui, sans-serif;
+            background: var(--bg);
             color: #111;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
         }
 
         .app {
@@ -19,12 +27,19 @@
             overflow: hidden;
         }
 
+        /* Sidebar */
         .sidebar {
             width: 260px;
-            background: #ffffffcc;
-            backdrop-filter: blur(20px);
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(14px);
+            box-shadow: 2px 0 18px rgba(0,0,0,0.06);
             padding: 20px;
+            transition: transform .33s cubic-bezier(.22,.9,.31,1), opacity .25s;
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-104%);
+            opacity: 0;
         }
 
         .sidebar h2 {
@@ -40,206 +55,253 @@
 
         .sidebar li {
             padding: 12px 10px;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             border-radius: 6px;
             cursor: pointer;
-            transition: background .2s;
+            transition: background .18s, transform .12s;
+            user-select: none;
         }
 
-        .sidebar li:hover {
-            background: #e9e9e9;
-        }
+        .sidebar li:hover { transform: translateX(4px); background: #f1f1f1; }
 
         .sidebar .active {
-            background: #0078d4;
+            background: var(--accent);
             color: #fff;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.04);
         }
 
+        /* Content */
         .content {
             flex: 1;
             padding: 30px;
             overflow-y: auto;
+            transition: opacity .28s ease, transform .28s ease;
         }
 
+        /* Fade animations used by JS */
+        .fade-in { animation: fadeIn .28s ease forwards; }
+        .fade-out { animation: fadeOut .22s ease forwards; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0);} }
+        @keyframes fadeOut{ from { opacity: 1; transform: translateY(0);} to { opacity: 0; transform: translateY(6px);} }
+
+        /* Cards */
         .card-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 18px;
+            margin-top: 22px;
         }
 
         .card {
             background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.06);
             cursor: pointer;
-            transition: transform .15s, box-shadow .15s;
+            transition: transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s;
+            will-change: transform;
         }
 
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        .card:hover { transform: translateY(-6px) scale(1.01); box-shadow: var(--card-shadow); }
+
+        /* Small card enter animation */
+        .card.enter { animation: cardEnter .32s cubic-bezier(.22,.9,.31,1) forwards; opacity: 0; }
+        @keyframes cardEnter { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .app { flex-direction: column; }
+
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                z-index: 20;
+                left: 0; top: 0; bottom: 0;
+            }
+
+            .topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 12px 16px;
+                background: white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+                z-index: 5;
+            }
+
+            .menu-btn { font-size: 20px; cursor: pointer; user-select: none; }
+
+            .content { padding: 16px; }
         }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .tab {
+            padding: 8px 12px;
+            background: #e9e9e9;
+            border-radius: 999px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform .18s, background .18s;
+        }
+
+        .tab:active { transform: translateY(1px); }
+
+        .tab.active { background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+
+        /* Subpage */
+        .sub-page .back-btn { color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+
     </style>
 </head>
 <body>
+
+    <!-- Mobile Top Bar -->
+    <div class="topbar" id="topbar">
+        <div class="menu-btn" id="menuBtn">☰</div>
+        <div style="font-weight:600;">Settings</div>
+    </div>
+
     <div class="app">
-        <aside class="sidebar">
+        <aside class="sidebar hidden" id="sidebar">
             <h2>Settings</h2>
-            <ul>
-                <li class="active">System</li>
-                <li>Bluetooth & Devices</li>
-                <li>Network & Internet</li>
-                <li>Personalization</li>
-                <li>Apps</li>
-                <li>Accounts</li>
-                <li>Time & Language</li>
-            </ul>
+            <ul id="sidebar-list"></ul>
         </aside>
 
-        <main class="content">
-            <h1>System</h1>
-            <div class="card-grid">
-                <div class="card">Display</div>
-                <div class="card">Sound</div>
-                <div class="card">Notifications</div>
-                <div class="card">Storage</div>
-                <div class="card">Multitasking</div>
-                <div class="card">About</div>
-            </div>
-        </main>
+        <main class="content" id="content"></main>
     </div>
 
     <script>
-        /* =========================================================
-   SETTINGS PAGE DEFINITIONS
-========================================================= */
+        /* --------------------
+           Data
+        --------------------*/
+        const pages = {
+            system: { name: "System", cards: ["Display","Sound","Notifications","Storage","Multitasking","About"] },
+            devices: { name: "Bluetooth & Devices", cards: ["Bluetooth","Printers","Mouse","Keyboard"] },
+            network: { name: "Network & Internet", cards: ["Wi-Fi","Ethernet","VPN"] },
+            personalization: { name: "Personalization", cards: ["Background","Colors","Themes","Lock Screen"] },
+            apps: { name: "Apps", cards: ["Installed Apps","Default Apps","Startup"] },
+            accounts: { name: "Accounts", cards: ["Your Info","Sign-in Options","Family"] },
+            time: { name: "Time & Language", cards: ["Date & Time","Language","Typing"] }
+        };
 
-const pages = {
-    system: {
-        name: "System",
-        cards: ["Display", "Sound", "Notifications", "Storage", "Multitasking", "About"]
-    },
-    devices: {
-        name: "Bluetooth & Devices",
-        cards: ["Bluetooth", "Printers", "Mouse", "Keyboard"]
-    },
-    network: {
-        name: "Network & Internet",
-        cards: ["Wi-Fi", "Ethernet", "VPN"]
-    },
-    personalization: {
-        name: "Personalization",
-        cards: ["Background", "Colors", "Themes", "Lock Screen"]
-    },
-    apps: {
-        name: "Apps",
-        cards: ["Installed Apps", "Default Apps", "Startup"]
-    },
-    accounts: {
-        name: "Accounts",
-        cards: ["Your Info", "Sign-in Options", "Family"]
-    },
-    time: {
-        name: "Time & Language",
-        cards: ["Date & Time", "Language", "Typing"]
-    }
-};
+        /* --------------------
+           Elements
+        --------------------*/
+        const sidebarList = document.getElementById('sidebar-list');
+        const content = document.getElementById('content');
+        const sidebar = document.getElementById('sidebar');
+        const menuBtn = document.getElementById('menuBtn');
 
-
-/* =========================================================
-   RENDER SIDEBAR
-========================================================= */
-
-const sidebar = document.getElementById("sidebar");
-const content = document.getElementById("content");
-
-Object.entries(pages).forEach(([key, page], index) => {
-    const li = document.createElement("li");
-    li.innerText = page.name;
-    li.dataset.page = key;
-
-    if (index === 0) li.classList.add("active");
-
-    li.addEventListener("click", () => loadCategory(key));
-    sidebar.appendChild(li);
-});
-
-
-/* =========================================================
-   PAGE LOADER WRAPPER (fade animation)
-========================================================= */
-
-function fadeContent(callback) {
-    content.classList.add("fade-out");
-
-    setTimeout(() => {
-        callback();
-        content.classList.remove("fade-out");
-        content.classList.add("fade-in");
-
-        setTimeout(() => content.classList.remove("fade-in"), 180);
-    }, 180);
-}
-
-
-/* =========================================================
-   LOAD CATEGORY PAGE
-========================================================= */
-
-function loadCategory(key) {
-    const page = pages[key];
-    if (!page) return;
-
-    fadeContent(() => {
-        // update active state
-        document.querySelectorAll(".sidebar li").forEach(li => {
-            li.classList.toggle("active", li.dataset.page === key);
+        /* --------------------
+           Render sidebar
+        --------------------*/
+        Object.entries(pages).forEach(([key,page], i) => {
+            const li = document.createElement('li');
+            li.textContent = page.name;
+            li.dataset.page = key;
+            if (i === 0) li.classList.add('active');
+            li.addEventListener('click', () => { loadCategory(key); closeSidebarOnMobile(); });
+            sidebarList.appendChild(li);
         });
 
-        // cards
-        content.innerHTML = `
-            <h1>${page.name}</h1>
-            <div class="card-grid">
-                ${page.cards
-                    .map(card => `
-                        <div class="card" onclick="openSubPage('${key}', '${card}')">
-                            ${card}
-                        </div>
-                    `)
-                    .join("")}
-            </div>
-        `;
-    });
-}
+        /* --------------------
+           Helpers: sidebar toggle
+        --------------------*/
+        function toggleSidebar(){ sidebar.classList.toggle('hidden'); }
+        function closeSidebarOnMobile(){ if (window.matchMedia('(max-width:768px)').matches) sidebar.classList.add('hidden'); }
+        menuBtn.addEventListener('click', toggleSidebar);
 
+        /* --------------------
+           Page transition wrapper (fade)
+        --------------------*/
+        function fadeContent(callback){
+            // add fade-out then call callback then fade-in
+            content.classList.remove('fade-in');
+            content.classList.add('fade-out');
+            setTimeout(() => {
+                // perform DOM changes
+                callback();
+                // run fade in
+                content.classList.remove('fade-out');
+                content.classList.add('fade-in');
+            }, 220);
+        }
 
-/* =========================================================
-   OPEN SUBPAGE
-========================================================= */
+        /* --------------------
+           Load category
+        --------------------*/
+        function loadCategory(key){
+            const page = pages[key];
+            if (!page) return;
 
-function openSubPage(categoryKey, cardName) {
-    fadeContent(() => {
-        content.innerHTML = `
-            <div class="sub-page">
-                <div class="back-btn" onclick="loadCategory('${categoryKey}')">← Back</div>
-                <h1>${cardName}</h1>
+            // mark active in sidebar
+            document.querySelectorAll('#sidebar-list li').forEach(li => li.classList.toggle('active', li.dataset.page === key));
 
-                <p>
-                    This is the <b>${cardName}</b> settings page.<br>
-                    Add controls, switches, UI components, etc.
-                </p>
-            </div>
-        `;
-    });
-}
+            fadeContent(() => {
+                // build tabs html
+                const tabsHtml = page.cards.map(c => `<div class="tab" data-card="${escapeHtml(c)}">${escapeHtml(c)}</div>`).join('');
 
+                // build card grid html
+                const cardsHtml = page.cards.map(c => `<div class="card enter" data-card="${escapeHtml(c)}">${escapeHtml(c)}</div>`).join('');
 
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-loadCategory("system");
+                content.innerHTML = `\n                    <h1>${escapeHtml(page.name)}</h1>\n                    <div class="tabs">${tabsHtml}</div>\n                    <div class="card-grid">${cardsHtml}</div>\n                `;
+
+                // attach listeners to tabs and cards
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // tab active state
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        // open subpage for that card
+                        openSubPage(key, tab.dataset.card);
+                        closeSidebarOnMobile();
+                    });
+                });
+
+                // cards click
+                document.querySelectorAll('.card').forEach(card => {
+                    card.addEventListener('click', () => { openSubPage(key, card.dataset.card); closeSidebarOnMobile(); });
+                });
+
+                // stagger animation remove "enter" class after animation finishes
+                const entering = document.querySelectorAll('.card.enter');
+                entering.forEach((el, idx) => setTimeout(() => el.classList.remove('enter'), 50 + idx * 40));
+            });
+        }
+
+        /* --------------------
+           Open subpage
+        --------------------*/
+        function openSubPage(categoryKey, cardName){
+            if (!cardName) return;
+
+            fadeContent(() => {
+                content.innerHTML = `\n                    <div class="sub-page">\n                        <div class="back-btn" style="cursor:pointer;margin-bottom:10px;" id="backBtn">← Back</div>\n                        <h1>${escapeHtml(cardName)}</h1>\n                        <p>This is the <b>${escapeHtml(cardName)}</b> settings page. Add controls like toggles, sliders, or inputs here.</p>\n                    </div>\n                `;
+
+                // wire back button
+                document.getElementById('backBtn').addEventListener('click', () => loadCategory(categoryKey));
+            });
+        }
+
+        /* --------------------
+           Utilities
+        --------------------*/
+        function escapeHtml(str){ return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[s]); }
+
+        /* --------------------
+           Initial load
+        --------------------*/
+        loadCategory('system');
+
     </script>
 </body>
 </html>
